@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webcam Tunnel with Draggable Window</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+</head>
+<body>
+  <script>
+    let cam;
+    let layers = [];
+    let numLayers = 10;
+    let dragWindow = { x: 100, y: 100, w: 200, h: 150 };
+    let dragging = false;
+    let offsetX, offsetY;
+
+    function setup() {
+      createCanvas(640, 480);
+      cam = createCapture(VIDEO);
+      cam.size(640, 480);
+      cam.hide();
+      
+      // Initialize layers as images
+      for (let i = 0; i < numLayers; i++) {
+        layers[i] = createGraphics(width, height);
+      }
+    }
+
+    function draw() {
+      background(0);
+      
+      // Update layers with webcam frames
+      for (let i = 0; i < numLayers; i++) {
+        let scaleFactor = map(i, 0, numLayers - 1, 1, 0.5);
+        layers[i].image(cam, 0, 0, width * scaleFactor, height * scaleFactor);
+        
+        let x = width * (1 - scaleFactor) / 2;
+        let y = height * (1 - scaleFactor) / 2;
+        image(layers[i], x, y);
+      }
+      
+      // Draw draggable window
+      fill(255, 0, 0, 150);
+      stroke(255);
+      strokeWeight(2);
+      rect(dragWindow.x, dragWindow.y, dragWindow.w, dragWindow.h);
+      
+      // Draw webcam inside draggable window
+      image(cam, dragWindow.x, dragWindow.y, dragWindow.w, dragWindow.h);
+    }
+
+    function mousePressed() {
+      if (mouseX > dragWindow.x && mouseX < dragWindow.x + dragWindow.w &&
+          mouseY > dragWindow.y && mouseY < dragWindow.y + dragWindow.h) {
+        dragging = true;
+        offsetX = mouseX - dragWindow.x;
+        offsetY = mouseY - dragWindow.y;
+      }
+    }
+
+    function mouseDragged() {
+      if (dragging) {
+        dragWindow.x = mouseX - offsetX;
+        dragWindow.y = mouseY - offsetY;
+      }
+    }
+
+    function mouseReleased() {
+      dragging = false;
+    }
+  </script>
+</body>
+</html>
