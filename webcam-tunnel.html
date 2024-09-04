@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Webcam Tunnel with Draggable Window</title>
+  <title>Webcam Tunnel with Lag and Draggable Window</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
 </head>
 <body>
   <script>
     let cam;
-    let layers = [];
+    let frames = [];
     let numLayers = 10;
+    let frameDelay = 3; // Number of frames to wait before pushing a new frame to the stack
     let dragWindow = { x: 100, y: 100, w: 200, h: 150 };
     let dragging = false;
     let offsetX, offsetY;
@@ -20,26 +21,33 @@
       cam = createCapture(VIDEO);
       cam.size(640, 480);
       cam.hide();
-      
-      // Initialize layers as images
+
+      // Initialize frame cache with empty images
       for (let i = 0; i < numLayers; i++) {
-        layers[i] = createGraphics(width, height);
+        frames.push(createImage(width, height));
       }
     }
 
     function draw() {
       background(0);
-      
-      // Update layers with webcam frames
+
+      // Push new frame every 3rd draw cycle to create the lag effect
+      if (frameCount % frameDelay == 0) {
+        let currentFrame = createImage(cam.width, cam.height);
+        currentFrame.copy(cam, 0, 0, cam.width, cam.height, 0, 0, width, height);
+        frames.push(currentFrame); // Push the current webcam frame to the array
+        frames.shift(); // Remove the oldest frame to keep the array length constant
+      }
+
+      // Display the cached frames in a tunnel effect
       for (let i = 0; i < numLayers; i++) {
         let scaleFactor = map(i, 0, numLayers - 1, 1, 0.5);
-        layers[i].image(cam, 0, 0, width * scaleFactor, height * scaleFactor);
-        
         let x = width * (1 - scaleFactor) / 2;
         let y = height * (1 - scaleFactor) / 2;
-        image(layers[i], x, y);
+
+        image(frames[i], x, y, width * scaleFactor, height * scaleFactor);
       }
-      
+
       // Draw draggable window
       fill(255, 0, 0, 150);
       stroke(255);
