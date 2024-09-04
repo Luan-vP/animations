@@ -31,6 +31,9 @@
     function draw() {
       background(0);
 
+      // Render the scene and capture it
+      drawScene();
+
       // Push new frame every 3rd draw cycle to create the lag effect
       if (frameCount % frameDelay == 0) {
         let currentFrame = get(); // Capture the entire canvas (including the window) into an image
@@ -46,9 +49,6 @@
 
         image(frames[i], x, y, width * scaleFactor, height * scaleFactor);
       }
-
-      // Draw the draggable window and webcam on top of everything else
-      drawScene();
     }
 
     function drawScene() {
