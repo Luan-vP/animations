@@ -31,11 +31,13 @@
     function draw() {
       background(0);
 
+      // Render the whole scene (layers and draggable window) for the current frame
+      drawScene();
+
       // Push new frame every 3rd draw cycle to create the lag effect
       if (frameCount % frameDelay == 0) {
-        let currentFrame = createImage(cam.width, cam.height);
-        currentFrame.copy(cam, 0, 0, cam.width, cam.height, 0, 0, width, height);
-        frames.push(currentFrame); // Push the current webcam frame to the array
+        let currentFrame = get(); // Capture the entire canvas (including the window) into an image
+        frames.push(currentFrame); // Push the current frame into the frames array
         frames.shift(); // Remove the oldest frame to keep the array length constant
       }
 
@@ -48,13 +50,21 @@
         image(frames[i], x, y, width * scaleFactor, height * scaleFactor);
       }
 
-      // Draw draggable window
+      // Finally, draw the latest scene again (including the draggable window)
+      drawScene();
+    }
+
+    function drawScene() {
+      // Draw the webcam image as the background
+      image(cam, 0, 0, width, height);
+
+      // Draw the draggable window
       fill(255, 0, 0, 150);
       stroke(255);
       strokeWeight(2);
       rect(dragWindow.x, dragWindow.y, dragWindow.w, dragWindow.h);
-      
-      // Draw webcam inside draggable window
+
+      // Draw webcam inside the draggable window
       image(cam, dragWindow.x, dragWindow.y, dragWindow.w, dragWindow.h);
     }
 
